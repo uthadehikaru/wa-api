@@ -52,7 +52,7 @@ Check if the service is running properly.
   "message": "pong",
   "service": "Whisper API",
   "status": "alive",
-  "timestamp": "2024-01-01T10:00:00.000Z",
+  "timestamp": "2025-07-13T10:00:00.000Z",
   "responseTime": "5ms"
 }
 ```
@@ -74,13 +74,13 @@ Check WhatsApp connection status (connected/disconnected).
       "qrAvailable": false
     },
     "baileys": {
-      "version": "6.5.0",
+      "version": "^6.7.18",
       "isServiceAlive": true
     },
     "server": {
       "uptime": 3600,
-      "timestamp": "2024-01-01T10:00:00.000Z",
-      "nodeVersion": "v18.17.0"
+      "timestamp": "2025-07-13T10:00:00.000Z",
+      "nodeVersion": "v20.19.0"
     }
   }
 }
@@ -107,7 +107,7 @@ Send text message to a WhatsApp number.
     "phoneNumber": "628123456789",
     "message": "Hello, this is a test message!",
     "status": "sent",
-    "timestamp": "2024-01-01T10:00:00.000Z"
+    "timestamp": "2025-07-13T10:00:00.000Z"
   },
   "message": "Message sent successfully"
 }
@@ -134,7 +134,7 @@ Send message to a WhatsApp group.
     "groupId": "120363042123456789@g.us",
     "message": "Hello group!",
     "status": "sent",
-    "timestamp": "2024-01-01T10:00:00.000Z"
+    "timestamp": "2025-07-13T10:00:00.000Z"
   },
   "message": "Group message sent successfully"
 }
@@ -158,13 +158,13 @@ Retrieve application activity logs.
       {
         "level": "info",
         "message": "Message sent successfully to 628123456789",
-        "timestamp": "2024-01-01T10:00:00.000Z"
+        "timestamp": "2025-07-13T10:00:00.000Z"
       }
     ],
     "total": 1,
     "limit": 100,
     "level": "all",
-    "timestamp": "2024-01-01T10:00:00.000Z"
+    "timestamp": "2025-07-13T10:00:00.000Z"
   },
   "message": "Retrieved 1 log entries"
 }
@@ -234,7 +234,7 @@ The API returns standardized error responses:
   "success": false,
   "error": "Error type",
   "message": "Detailed error message",
-  "timestamp": "2024-01-01T10:00:00.000Z"
+  "timestamp": "2025-07-13T10:00:00.000Z"
 }
 ```
 
