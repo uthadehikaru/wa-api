@@ -1,5 +1,11 @@
 # Whisper API
 
+[![Node.js](https://img.shields.io/badge/Node.js-v20+-green)](https://nodejs.org/en)
+[![Express.js](https://img.shields.io/badge/Express.js-v5.1+-blue)](https://expressjs.com/)
+[![Baileys](https://img.shields.io/badge/Baileys-v6.7+-purple)](https://github.com/WhiskeySockets/Baileys/)
+[![License](https://img.shields.io/badge/License-MIT-yellow)](https://github.com/ibnusyawall/whisper-api/blob/main/LICENSE)
+[![CodeFactor](https://www.codefactor.io/repository/github/ibnusyawall/whisper-api/badge)](https://www.codefactor.io/repository/github/ibnusyawall/whisper-api)
+
 A RESTful WhatsApp messaging API built with Express.js and Baileys library for seamless WhatsApp integration.
 
 ## Features
