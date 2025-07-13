@@ -185,12 +185,14 @@ src/
 ├── routes/
 │   └── index.js          # Route definitions
 ├── controllers/
-│   ├── pingController.js # Health check handler
-│   ├── statusController.js # Status check handler
-│   ├── messageController.js # Message sending handler
-│   └── logController.js  # Logging handler
+│   ├── ping.controller.js # Health check handler
+│   ├── status.controller.js # Status check handler
+│   ├── message.controller.js # Message sending handler
+│   └── log.controller.js  # Logging handler
+├── plugins/
+│   └── anti-mention.plugin.js # Anti mention plugin
 ├── services/
-│   └── whatsappService.js # WhatsApp/Baileys service
+│   └── whatsapp.service.js # WhatsApp/Baileys service
 └── utils/
     └── logger.js         # Winston logger utility
 
