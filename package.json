@@ -1,0 +1,39 @@
+{
+  "name": "whisper-api",
+  "version": "1.0.0",
+  "description": "WhatsApp REST API using Baileys library",
+  "homepage": "https://github.com/ibnusyawall/whisper-api",
+  "repository": {
+    "url": "git@github.com:ibnusyawall/whisper-api.git"
+  },
+  "main": "src/app.js",
+  "scripts": {
+    "start": "node src/app.js",
+    "dev": "node src/app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "whatsapp",
+    "api",
+    "baileys",
+    "express",
+    "rest-api"
+  ],
+  "author": "ibnusyawall",
+  "license": "MIT",
+  "dependencies": {
+    "baileys": "^6.7.18",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.0",
+    "express": "^5.1.0",
+    "helmet": "^8.1.0",
+    "morgan": "^1.10.0",
+    "qrcode-terminal": "^0.12.0",
+    "winston": "^3.17.0"
+  },
+  "devDependencies": {},
+  "engines": {
+    "node": ">=20.19.0"
+  },
+  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
+}
