@@ -16,7 +16,8 @@ const statusController = {
                     connection: {
                         isConnected: status.isConnected,
                         status: status.connectionStatus,
-                        qrAvailable: status.qrCode !== null
+                        qrAvailable: status.qrCode !== null,
+                        qrCodeImageUrl: status.qrCodeImagePath
                     },
                     baileys: {
                         version: `${packageJson.dependencies.baileys}`,

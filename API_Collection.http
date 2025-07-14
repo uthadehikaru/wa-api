@@ -52,6 +52,31 @@ GET http://localhost:3000/api/v1/logs?level=info&limit=100
 Content-Type: application/json
 
 ###
+# 9. QR Code Status
+GET http://localhost:3000/api/v1/qr/status
+Content-Type: application/json
+
+###
+# 10. QR Code Image
+GET http://localhost:3000/api/v1/qr/image
+Content-Type: application/json
+
+###
+# 11. Logout from WhatsApp
+POST http://localhost:3000/api/v1/qr/logout
+Content-Type: application/json
+
+###
+# 12. Regenerate QR Code
+POST http://localhost:3000/api/v1/qr/regenerate
+Content-Type: application/json
+
+###
+# 13. Clear Authentication
+POST http://localhost:3000/api/v1/qr/clear-auth
+Content-Type: application/json
+
+###
 # Example Error Cases
 
 ###

@@ -1,0 +1,189 @@
+const logger = require('../utils/logger');
+const whatsappService = require('../services/whatsapp.service');
+const path = require('path');
+const fs = require('fs');
+
+const qrController = {
+    getQRImage: async (req, res) => {
+        try {
+            logger.info('📱 QR Code image request received');
+
+            const status = whatsappService.getStatus();
+            
+            if (status.connectionStatus !== 'qr_ready') {
+                return res.status(404).json({
+                    success: false,
+                    error: 'QR Code not available',
+                    message: 'WhatsApp is not in QR code generation state'
+                });
+            }
+
+            if (!whatsappService.hasQRCodeImage()) {
+                return res.status(404).json({
+                    success: false,
+                    error: 'QR Code image not found',
+                    message: 'QR Code image file does not exist'
+                });
+            }
+
+            const qrImagePath = whatsappService.getQRCodeImagePath();
+            
+            // Set appropriate headers for image
+            res.setHeader('Content-Type', 'image/png');
+            res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+            res.setHeader('Pragma', 'no-cache');
+            res.setHeader('Expires', '0');
+
+            // Stream the image file
+            const stream = fs.createReadStream(qrImagePath);
+            stream.pipe(res);
+
+            logger.info('📱 QR Code image served successfully');
+
+        } catch (error) {
+            logger.error('❌ Error serving QR code image:', error);
+
+            res.status(500).json({
+                success: false,
+                error: 'Failed to serve QR code image',
+                message: error.message,
+                timestamp: new Date().toISOString()
+            });
+        }
+    },
+
+    getQRStatus: async (req, res) => {
+        try {
+            logger.info('📱 QR Code status request received');
+
+            const status = whatsappService.getStatus();
+            
+            const response = {
+                success: true,
+                data: {
+                    qrAvailable: status.connectionStatus === 'qr_ready',
+                    connectionStatus: status.connectionStatus,
+                    qrCodeImageUrl: status.qrCodeImagePath,
+                    timestamp: status.timestamp
+                }
+            };
+
+            logger.info(`📱 QR Status response: ${status.connectionStatus}, QR Available: ${response.data.qrAvailable}`);
+
+            res.status(200).json(response);
+
+        } catch (error) {
+            logger.error('❌ Error in QR status controller:', error);
+
+            const response = {
+                success: false,
+                error: 'Failed to get QR status',
+                message: error.message,
+                timestamp: new Date().toISOString()
+            };
+
+            res.status(500).json(response);
+        }
+    },
+
+    logout: async (req, res) => {
+        try {
+            logger.info('🔓 Logout request received');
+
+            const result = await whatsappService.logout();
+            
+            const response = {
+                success: result.success,
+                data: {
+                    message: result.message,
+                    connectionStatus: whatsappService.getStatus().connectionStatus,
+                    timestamp: new Date().toISOString()
+                }
+            };
+
+            logger.info(`🔓 Logout response: ${result.message}`);
+
+            res.status(200).json(response);
+
+        } catch (error) {
+            logger.error('❌ Error in logout controller:', error);
+
+            const response = {
+                success: false,
+                error: 'Failed to logout',
+                message: error.message,
+                timestamp: new Date().toISOString()
+            };
+
+            res.status(500).json(response);
+        }
+    },
+
+    regenerateQR: async (req, res) => {
+        try {
+            logger.info('🔄 QR code regeneration request received');
+
+            const result = await whatsappService.regenerateQR();
+            
+            const response = {
+                success: result.success,
+                data: {
+                    message: result.message,
+                    connectionStatus: whatsappService.getStatus().connectionStatus,
+                    timestamp: new Date().toISOString()
+                }
+            };
+
+            logger.info(`🔄 QR regeneration response: ${result.message}`);
+
+            res.status(200).json(response);
+
+        } catch (error) {
+            logger.error('❌ Error in QR regeneration controller:', error);
+
+            const response = {
+                success: false,
+                error: 'Failed to regenerate QR code',
+                message: error.message,
+                timestamp: new Date().toISOString()
+            };
+
+            res.status(500).json(response);
+        }
+    },
+
+    clearAuth: async (req, res) => {
+        try {
+            logger.info('🗑️ Clear authentication request received');
+
+            const result = await whatsappService.clearAuth();
+            
+            const response = {
+                success: result.success,
+                data: {
+                    message: result.message,
+                    connectionStatus: whatsappService.getStatus().connectionStatus,
+                    timestamp: new Date().toISOString()
+                }
+            };
+
+            logger.info(`🗑️ Clear auth response: ${result.message}`);
+
+            res.status(200).json(response);
+
+        } catch (error) {
+            logger.error('❌ Error in clear auth controller:', error);
+
+            const response = {
+                success: false,
+                error: 'Failed to clear authentication',
+                message: error.message,
+                timestamp: new Date().toISOString()
+            };
+
+            res.status(500).json(response);
+        }
+    }
+};
+
+module.exports = qrController; 

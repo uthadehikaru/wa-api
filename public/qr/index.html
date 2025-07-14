@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WhatsApp QR Code Scanner</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+        }
+        .title {
+            color: #25D366;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+        }
+        .qr-container {
+            margin: 30px 0;
+            padding: 20px;
+            border: 2px dashed #ddd;
+            border-radius: 15px;
+            background: #f9f9f9;
+        }
+        .qr-image {
+            max-width: 300px;
+            width: 100%;
+            height: auto;
+            border-radius: 10px;
+        }
+        .status {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 10px;
+            font-weight: 500;
+        }
+        .status.ready {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .status.waiting {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        .status.connected {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        .instructions {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: left;
+        }
+        .instructions ol {
+            margin: 0;
+            padding-left: 20px;
+        }
+        .instructions li {
+            margin: 8px 0;
+            color: #555;
+        }
+        .refresh-btn {
+            background: #25D366;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: background 0.3s;
+        }
+        .refresh-btn:hover {
+            background: #128C7E;
+        }
+        .refresh-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .button-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        .action-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        .logout-btn {
+            background: #dc3545;
+            color: white;
+        }
+        .logout-btn:hover {
+            background: #c82333;
+        }
+        .regenerate-btn {
+            background: #ffc107;
+            color: #212529;
+        }
+        .regenerate-btn:hover {
+            background: #e0a800;
+        }
+        .clear-auth-btn {
+            background: #6c757d;
+            color: white;
+        }
+        .clear-auth-btn:hover {
+            background: #5a6268;
+        }
+        .action-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .auto-refresh {
+            margin-top: 20px;
+            color: #666;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="title">📱 WhatsApp QR Code Scanner</div>
+        <div class="subtitle">Scan this QR code with your WhatsApp mobile app</div>
+        
+        <div id="status" class="status waiting">
+            Checking connection status...
+        </div>
+        
+        <div id="qrContainer" class="qr-container" style="display: none;">
+            <img id="qrImage" class="qr-image" alt="WhatsApp QR Code">
+        </div>
+        
+        <div id="instructions" class="instructions" style="display: none;">
+            <strong>How to scan:</strong>
+            <ol>
+                <li>Open WhatsApp on your phone</li>
+                <li>Go to Settings > Linked Devices</li>
+                <li>Tap "Link a Device"</li>
+                <li>Point your phone camera at the QR code above</li>
+                <li>Wait for the connection to complete</li>
+            </ol>
+        </div>
+        
+        <div class="button-group">
+            <button id="refreshBtn" class="refresh-btn" onclick="checkStatus()">
+                Refresh Status
+            </button>
+            
+            <button id="logoutBtn" class="action-btn logout-btn" onclick="logout()" style="display: none;">
+                Logout
+            </button>
+            
+            <button id="regenerateBtn" class="action-btn regenerate-btn" onclick="regenerateQR()" style="display: none;">
+                New QR Code
+            </button>
+            
+            <button id="clearAuthBtn" class="action-btn clear-auth-btn" onclick="clearAuth()">
+                Clear Auth
+            </button>
+        </div>
+        
+        <div class="auto-refresh">
+            Auto-refreshing every 5 seconds...
+        </div>
+    </div>
+
+    <script>
+        let refreshInterval;
+        
+        async function checkStatus() {
+            try {
+                const response = await fetch('/api/v1/qr/status');
+                const data = await response.json();
+                
+                const statusDiv = document.getElementById('status');
+                const qrContainer = document.getElementById('qrContainer');
+                const qrImage = document.getElementById('qrImage');
+                const instructions = document.getElementById('instructions');
+                const refreshBtn = document.getElementById('refreshBtn');
+                
+                if (data.success) {
+                    const status = data.data.connectionStatus;
+                    
+                    if (status === 'qr_ready' && data.data.qrAvailable) {
+                        statusDiv.className = 'status ready';
+                        statusDiv.textContent = '✅ QR Code Ready - Please scan with WhatsApp';
+                        
+                        qrContainer.style.display = 'block';
+                        instructions.style.display = 'block';
+                        
+                        // Update QR image with timestamp to prevent caching
+                        qrImage.src = data.data.qrCodeImageUrl + '?t=' + Date.now();
+                        
+                        refreshBtn.disabled = false;
+                        
+                        // Show regenerate button when QR is ready
+                        document.getElementById('logoutBtn').style.display = 'none';
+                        document.getElementById('regenerateBtn').style.display = 'inline-block';
+                    } else if (status === 'connected') {
+                        statusDiv.className = 'status connected';
+                        statusDiv.textContent = '✅ WhatsApp Connected Successfully!';
+                        
+                        qrContainer.style.display = 'none';
+                        instructions.style.display = 'none';
+                        
+                        refreshBtn.disabled = false;
+                        
+                        // Show logout button when connected
+                        document.getElementById('logoutBtn').style.display = 'inline-block';
+                        document.getElementById('regenerateBtn').style.display = 'none';
+                    } else if (status === 'connecting') {
+                        statusDiv.className = 'status waiting';
+                        statusDiv.textContent = '🔄 Connecting to WhatsApp...';
+                        
+                        qrContainer.style.display = 'none';
+                        instructions.style.display = 'none';
+                        
+                        refreshBtn.disabled = false;
+                        
+                        // Hide action buttons during connection
+                        document.getElementById('logoutBtn').style.display = 'none';
+                        document.getElementById('regenerateBtn').style.display = 'none';
+                    } else {
+                        statusDiv.className = 'status waiting';
+                        statusDiv.textContent = '⏳ Waiting for QR code...';
+                        
+                        qrContainer.style.display = 'none';
+                        instructions.style.display = 'none';
+                        
+                        refreshBtn.disabled = false;
+                        
+                        // Hide action buttons when waiting
+                        document.getElementById('logoutBtn').style.display = 'none';
+                        document.getElementById('regenerateBtn').style.display = 'none';
+                    }
+                } else {
+                    statusDiv.className = 'status waiting';
+                    statusDiv.textContent = '❌ Error checking status: ' + data.error;
+                    refreshBtn.disabled = false;
+                }
+            } catch (error) {
+                console.error('Error checking status:', error);
+                document.getElementById('status').className = 'status waiting';
+                document.getElementById('status').textContent = '❌ Network error - Please try again';
+                document.getElementById('refreshBtn').disabled = false;
+            }
+        }
+        
+        // Initial check
+        checkStatus();
+        
+        // Auto-refresh every 5 seconds
+        refreshInterval = setInterval(checkStatus, 5000);
+        
+        // Stop auto-refresh when page is not visible
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                clearInterval(refreshInterval);
+            } else {
+                refreshInterval = setInterval(checkStatus, 5000);
+            }
+        });
+
+        async function logout() {
+            if (!confirm('Are you sure you want to logout from WhatsApp?')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/v1/qr/logout', { method: 'POST' });
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert('Logout successful! Please wait for QR code to appear.');
+                    checkStatus();
+                } else {
+                    alert('Logout failed: ' + data.message);
+                }
+            } catch (error) {
+                console.error('Error during logout:', error);
+                alert('Logout failed. Please try again.');
+            }
+        }
+
+        async function regenerateQR() {
+            if (!confirm('Are you sure you want to generate a new QR code?')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/v1/qr/regenerate', { method: 'POST' });
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert('QR code regeneration initiated! Please wait...');
+                    checkStatus();
+                } else {
+                    alert('QR regeneration failed: ' + data.message);
+                }
+            } catch (error) {
+                console.error('Error during QR regeneration:', error);
+                alert('QR regeneration failed. Please try again.');
+            }
+        }
+
+        async function clearAuth() {
+            if (!confirm('Are you sure you want to clear all authentication data? This will completely reset the WhatsApp connection.')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/v1/qr/clear-auth', { method: 'POST' });
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert('Authentication cleared successfully! Please wait for new QR code to appear.');
+                    checkStatus();
+                } else {
+                    alert('Clear auth failed: ' + data.message);
+                }
+            } catch (error) {
+                console.error('Error during clear auth:', error);
+                alert('Clear auth failed. Please try again.');
+            }
+        }
+    </script>
+</body>
+</html> 

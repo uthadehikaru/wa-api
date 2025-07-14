@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
+const path = require('path');
 const logger = require('./utils/logger');
 const whatsappService = require('./services/whatsapp.service');
 const routes = require('./routes');
@@ -16,6 +17,9 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Serve static files
+app.use('/public', express.static(path.join(__dirname, '../public')));
+
 // Custom morgan format with winston
 app.use(morgan('combined', {
     stream: {
@@ -27,6 +31,11 @@ app.use(morgan('combined', {
 
 // Routes
 app.use('/api/v1', routes);
+
+// QR Scanner page
+app.get('/qr', (req, res) => {
+    res.sendFile(path.join(__dirname, '../public/qr/index.html'));
+});
 
 // Error handling middleware
 app.use((err, req, res, next) => {

@@ -12,6 +12,7 @@ A RESTful WhatsApp messaging API built with Express.js and Baileys library for s
 
 - 🏓 **Ping/Pong** - Health check endpoint
 - 📊 **Status Check** - WhatsApp connection status monitoring
+- 📱 **QR Code Scanner** - Web interface for easy WhatsApp QR code scanning
 - 📨 **Send Message** - Send text messages to personal chats
 - 👥 **Send Group Message** - Send messages to WhatsApp groups
 - 📋 **Logging** - Comprehensive logging for all activities
@@ -146,7 +147,97 @@ Send message to a WhatsApp group.
 }
 ```
 
-### 5. Get Logs
+### 5. QR Code Status
+**GET** `/api/v1/qr/status`
+
+Check QR code availability and connection status.
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "qrAvailable": true,
+    "connectionStatus": "qr_ready",
+    "qrCodeImageUrl": "/api/v1/qr/image",
+    "timestamp": "2025-07-13T10:00:00.000Z"
+  }
+}
+```
+
+### 6. QR Code Image
+**GET** `/api/v1/qr/image`
+
+Get the QR code image for scanning (PNG format).
+
+**Response:** PNG image file
+
+### 7. QR Scanner Web Interface
+**GET** `/qr`
+
+Access the web-based QR code scanner interface.
+
+**Features:**
+- Real-time status updates
+- Auto-refresh every 5 seconds
+- Mobile-friendly design
+- Step-by-step instructions
+- Logout functionality
+- QR code regeneration
+- Authentication clearing
+
+### 8. Logout from WhatsApp
+**POST** `/api/v1/qr/logout`
+
+Logout from the current WhatsApp session.
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "message": "Logout successful",
+    "connectionStatus": "logged_out",
+    "timestamp": "2025-07-13T10:00:00.000Z"
+  }
+}
+```
+
+### 9. Regenerate QR Code
+**POST** `/api/v1/qr/regenerate`
+
+Generate a new QR code for WhatsApp connection.
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "message": "QR code regeneration initiated",
+    "connectionStatus": "disconnected",
+    "timestamp": "2025-07-13T10:00:00.000Z"
+  }
+}
+```
+
+### 10. Clear Authentication
+**POST** `/api/v1/qr/clear-auth`
+
+Clear all authentication data and reset the WhatsApp connection completely.
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "message": "Authentication cleared successfully",
+    "connectionStatus": "disconnected",
+    "timestamp": "2025-07-13T10:00:00.000Z"
+  }
+}
+```
+
+### 11. Get Logs
 **GET** `/api/v1/logs`
 
 Retrieve application activity logs.
@@ -179,9 +270,12 @@ Retrieve application activity logs.
 ## First Time Setup
 
 1. Start the server
-2. Scan the QR code displayed in the terminal using WhatsApp on your phone
-3. Check connection status using `/api/v1/status` endpoint
-4. Start sending messages!
+2. Open your browser and go to `http://localhost:3000/qr`
+3. Scan the QR code displayed on the web page using WhatsApp on your phone
+4. Check connection status using `/api/v1/status` endpoint
+5. Start sending messages!
+
+**Alternative:** You can also scan the QR code displayed in the terminal, but the web interface provides a better user experience.
 
 ## Project Structure
 
@@ -194,6 +288,7 @@ src/
 │   ├── ping.controller.js # Health check handler
 │   ├── status.controller.js # Status check handler
 │   ├── message.controller.js # Message sending handler
+│   ├── qr.controller.js   # QR code handler
 │   └── log.controller.js  # Logging handler
 ├── plugins/
 │   └── anti-mention.plugin.js # Anti mention plugin
@@ -204,6 +299,9 @@ src/
 
 auth/                     # Baileys authentication files
 logs/                     # Application logs
+public/                   # Static files
+└── qr/
+    └── index.html        # QR scanner web interface
 ```
 
 ## Environment Variables

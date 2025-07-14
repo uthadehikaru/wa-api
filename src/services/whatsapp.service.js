@@ -5,8 +5,10 @@ const {
     fetchLatestBaileysVersion
 } = require('baileys');
 const qrcode = require('qrcode-terminal');
+const qrcodeImage = require('qrcode');
 const logger = require('../utils/logger');
 const path = require('path');
+const fs = require('fs');
 const packageJson = require('../../package.json');
 
 // import plugins syncronously
@@ -19,6 +21,8 @@ class WhatsAppService {
         this.connectionStatus = 'disconnected';
         this.qrCode = null;
         this.authDir = path.join(__dirname, '../../auth');
+        this.qrCodeDir = path.join(__dirname, '../../public/qr');
+        this.qrCodePath = path.join(this.qrCodeDir, 'whatsapp-qr.png');
     }
 
     async initialize() {
@@ -26,9 +30,13 @@ class WhatsAppService {
             logger.info('🔄 Initializing WhatsApp service...');
 
             // Create auth directory if it doesn't exist
-            const fs = require('fs');
             if (!fs.existsSync(this.authDir)) {
                 fs.mkdirSync(this.authDir, { recursive: true });
+            }
+
+            // Create QR code directory if it doesn't exist
+            if (!fs.existsSync(this.qrCodeDir)) {
+                fs.mkdirSync(this.qrCodeDir, { recursive: true });
             }
 
             const { state, saveCreds } = await useMultiFileAuthState(this.authDir);
@@ -52,7 +60,7 @@ class WhatsAppService {
     }
 
     setupEventHandlers(saveCreds) {
-        this.sock.ev.on('connection.update', (update) => {
+        this.sock.ev.on('connection.update', async (update) => {
             const { connection, lastDisconnect, qr } = update;
 
             if (qr) {
@@ -60,6 +68,21 @@ class WhatsAppService {
                 logger.info('📱 QR Code generated. Scan to connect.');
                 qrcode.generate(qr, { small: true });
                 this.connectionStatus = 'qr_ready';
+                
+                // Generate and save QR code image
+                try {
+                    await qrcodeImage.toFile(this.qrCodePath, qr, {
+                        color: {
+                            dark: '#000000',
+                            light: '#FFFFFF'
+                        },
+                        width: 300,
+                        margin: 2
+                    });
+                    logger.info('📱 QR Code image saved successfully');
+                } catch (error) {
+                    logger.error('❌ Error saving QR code image:', error);
+                }
             }
 
             if (connection === 'close') {
@@ -121,7 +144,7 @@ class WhatsAppService {
             logger.info(`📤 Sending message to ${jid}: ${message}`);
 
             // please do-not remove watermark! 
-            message += `\n\n> Sent via ${(s => s[0].toUpperCase() + s.slice(1, s.indexOf('-')))(packageJson.name)}\n> @${packageJson.author}/${packageJson.name}.git`;
+            // message += `\n\n> Sent via ${(s => s[0].toUpperCase() + s.slice(1, s.indexOf('-')))(packageJson.name)}\n> @${packageJson.author}/${packageJson.name}.git`;
 
             await this.sock.sendMessage(jid, { text: message });
 
@@ -146,7 +169,7 @@ class WhatsAppService {
             logger.info(`📤 Sending group message to ${jid}: ${message}`);
 
             // please do-not remove watermark! 
-            message += `\n\n> Sent via ${(s => s[0].toUpperCase() + s.slice(1, s.indexOf('-')))(packageJson.name)}\n> @${packageJson.author}/${packageJson.name}.git`;
+            //message += `\n\n> Sent via ${(s => s[0].toUpperCase() + s.slice(1, s.indexOf('-')))(packageJson.name)}\n> @${packageJson.author}/${packageJson.name}.git`;
 
             await this.sock.sendMessage(jid, { text: message });
 
@@ -164,8 +187,119 @@ class WhatsAppService {
             isConnected: this.isConnected,
             connectionStatus: this.connectionStatus,
             qrCode: this.qrCode,
+            qrCodeImagePath: this.connectionStatus === 'qr_ready' ? '/api/v1/qr/image' : null,
             timestamp: new Date().toISOString()
         };
+    }
+
+    getQRCodeImagePath() {
+        return this.qrCodePath;
+    }
+
+    hasQRCodeImage() {
+        return fs.existsSync(this.qrCodePath);
+    }
+
+    async logout() {
+        try {
+            if (this.sock && this.isConnected) {
+                logger.info('🔓 Logging out from WhatsApp...');
+                await this.sock.logout();
+                this.connectionStatus = 'logged_out';
+                this.isConnected = false;
+                this.qrCode = null;
+                
+                // Remove QR code image if exists
+                if (this.hasQRCodeImage()) {
+                    fs.unlinkSync(this.qrCodePath);
+                    logger.info('🗑️ QR code image removed');
+                }
+                
+                logger.info('✅ Logout successful');
+                return { success: true, message: 'Logout successful' };
+            } else {
+                logger.warn('⚠️ No active connection to logout from');
+                return { success: false, message: 'No active connection' };
+            }
+        } catch (error) {
+            logger.error('❌ Error during logout:', error);
+            throw error;
+        }
+    }
+
+    async regenerateQR() {
+        try {
+            logger.info('🔄 Regenerating QR code...');
+            
+            // First logout if connected
+            if (this.isConnected) {
+                await this.logout();
+            }
+            
+            // Clear any existing QR code
+            this.qrCode = null;
+            if (this.hasQRCodeImage()) {
+                fs.unlinkSync(this.qrCodePath);
+            }
+            
+            // Reset connection status
+            this.connectionStatus = 'disconnected';
+            this.isConnected = false;
+            
+            // Reinitialize the service
+            await this.initialize();
+            
+            logger.info('✅ QR code regeneration initiated');
+            return { success: true, message: 'QR code regeneration initiated' };
+            
+        } catch (error) {
+            logger.error('❌ Error regenerating QR code:', error);
+            throw error;
+        }
+    }
+
+    async clearAuth() {
+        try {
+            logger.info('🗑️ Clearing authentication data...');
+            
+            // Logout first if connected
+            if (this.isConnected) {
+                await this.logout();
+            }
+            
+            // Remove auth directory contents
+            if (fs.existsSync(this.authDir)) {
+                const files = fs.readdirSync(this.authDir);
+                for (const file of files) {
+                    const filePath = path.join(this.authDir, file);
+                    if (fs.statSync(filePath).isFile()) {
+                        fs.unlinkSync(filePath);
+                    }
+                }
+                logger.info('🗑️ Authentication files cleared');
+            }
+            
+            // Remove QR code image
+            if (this.hasQRCodeImage()) {
+                fs.unlinkSync(this.qrCodePath);
+                logger.info('🗑️ QR code image removed');
+            }
+            
+            // Reset state
+            this.qrCode = null;
+            this.connectionStatus = 'disconnected';
+            this.isConnected = false;
+            
+            // Reinitialize
+            await this.initialize();
+            
+            logger.info('✅ Authentication cleared and service reinitialized');
+            return { success: true, message: 'Authentication cleared successfully' };
+            
+        } catch (error) {
+            logger.error('❌ Error clearing authentication:', error);
+            throw error;
+        }
     }
 
     isServiceAlive() {
