@@ -9,6 +9,9 @@ const logLevels = {
     debug: 3
 };
 
+// Get log level from environment variable, default to 'info'
+const logLevel = process.env.LOG_LEVEL || 'info';
+
 // Create logs directory if it doesn't exist
 const fs = require('fs');
 const logsDir = path.join(__dirname, '../../logs');
@@ -18,7 +21,7 @@ if (!fs.existsSync(logsDir)) {
 
 // Custom format for logs
 const logFormat = winston.format.combine(
-    winston.format.timestamp({
+    winston.format.timestamp({  
         format: 'DD-MM-YYYY HH:mm:ss'
     }),
     winston.format.errors({ stack: true }),
@@ -29,11 +32,12 @@ const logFormat = winston.format.combine(
 // Create winston logger
 const logger = winston.createLogger({
     levels: logLevels,
+    level: logLevel,
     format: logFormat,
     transports: [
         // Console transport
         new winston.transports.Console({
-            level: 'debug',
+            level: logLevel,
             format: winston.format.combine(
                 winston.format.colorize(),
                 winston.format.simple()
@@ -42,7 +46,7 @@ const logger = winston.createLogger({
         // File transport for all logs
         new winston.transports.File({
             filename: path.join(logsDir, 'app.log'),
-            level: 'info',
+            level: logLevel,
             maxsize: 5242880, // 5MB
             maxFiles: 10,
             format: logFormat
