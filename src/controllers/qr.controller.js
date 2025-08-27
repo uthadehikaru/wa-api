@@ -6,7 +6,7 @@ const fs = require('fs');
 const qrController = {
     getQRImage: async (req, res) => {
         try {
-            logger.info('📱 QR Code image request received');
+            logger.debug('📱 QR Code image request received');
 
             const status = whatsappService.getStatus();
             
@@ -38,7 +38,7 @@ const qrController = {
             const stream = fs.createReadStream(qrImagePath);
             stream.pipe(res);
 
-            logger.info('📱 QR Code image served successfully');
+            logger.debug('📱 QR Code image served successfully');
 
         } catch (error) {
             logger.error('❌ Error serving QR code image:', error);
@@ -54,7 +54,7 @@ const qrController = {
 
     getQRStatus: async (req, res) => {
         try {
-            logger.info('📱 QR Code status request received');
+            logger.debug('📱 QR Code status request received');
 
             const status = whatsappService.getStatus();
             
@@ -68,7 +68,7 @@ const qrController = {
                 }
             };
 
-            logger.info(`📱 QR Status response: ${status.connectionStatus}, QR Available: ${response.data.qrAvailable}`);
+            logger.debug(`📱 QR Status response: ${status.connectionStatus}, QR Available: ${response.data.qrAvailable}`);
 
             res.status(200).json(response);
 
@@ -88,7 +88,7 @@ const qrController = {
 
     logout: async (req, res) => {
         try {
-            logger.info('🔓 Logout request received');
+            logger.debug('🔓 Logout request received');
 
             const result = await whatsappService.logout();
             
@@ -101,7 +101,7 @@ const qrController = {
                 }
             };
 
-            logger.info(`🔓 Logout response: ${result.message}`);
+            logger.debug(`🔓 Logout response: ${result.message}`);
 
             res.status(200).json(response);
 
@@ -121,7 +121,7 @@ const qrController = {
 
     regenerateQR: async (req, res) => {
         try {
-            logger.info('🔄 QR code regeneration request received');
+            logger.debug('🔄 QR code regeneration request received');
 
             const result = await whatsappService.regenerateQR();
             
@@ -134,7 +134,7 @@ const qrController = {
                 }
             };
 
-            logger.info(`🔄 QR regeneration response: ${result.message}`);
+            logger.debug(`🔄 QR regeneration response: ${result.message}`);
 
             res.status(200).json(response);
 
@@ -154,7 +154,7 @@ const qrController = {
 
     clearAuth: async (req, res) => {
         try {
-            logger.info('🗑️ Clear authentication request received');
+            logger.debug('🗑️ Clear authentication request received');
 
             const result = await whatsappService.clearAuth();
             
@@ -167,7 +167,7 @@ const qrController = {
                 }
             };
 
-            logger.info(`🗑️ Clear auth response: ${result.message}`);
+            logger.debug(`🗑️ Clear auth response: ${result.message}`);
 
             res.status(200).json(response);
 

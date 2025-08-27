@@ -7,7 +7,7 @@ const pingController = {
         const startTime = Date.now();
 
         try {
-            logger.info('🏓 Ping request received');
+            logger.debug('🏓 Ping request received');
 
             const isServiceAlive = whatsappService.isServiceAlive();
             const responseTime = Date.now() - startTime;
@@ -21,7 +21,7 @@ const pingController = {
                 responseTime: `${responseTime}ms`
             };
 
-            logger.info(`✅ Ping response: Service ${response.status}, Response time: ${responseTime}ms`);
+            logger.debug(`✅ Ping response: Service ${response.status}, Response time: ${responseTime}ms`);
 
             res.status(200).json(response);
         } catch (error) {

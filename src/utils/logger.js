@@ -97,7 +97,7 @@ class LoggerWrapper {
     }
 
     info(message, ...args) {
-        this.logger.info(message, ...args);
+        this.logger.debug(message, ...args);
     }
 
     error(message, ...args) {

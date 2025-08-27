@@ -6,7 +6,7 @@ const messageController = {
         try {
             const { phoneNumber, message } = req.body;
 
-            logger.info(`📨 Send message request received for ${phoneNumber}`);
+            logger.debug(`📨 Send message request received for ${phoneNumber}`);
 
             // Validation
             if (!phoneNumber || !message) {
@@ -40,7 +40,7 @@ const messageController = {
             // Send message
             const result = await whatsappService.sendMessage(phoneNumber, message.trim());
 
-            logger.info(`✅ Message sent successfully to ${phoneNumber}`);
+            logger.debug(`✅ Message sent successfully to ${phoneNumber}`);
 
             const response = {
                 success: true,
@@ -73,7 +73,7 @@ const messageController = {
         try {
             const { groupId, message } = req.body;
 
-            logger.info(`📨 Send group message request received for ${groupId}`);
+            logger.debug(`📨 Send group message request received for ${groupId}`);
 
             // Validation
             if (!groupId || !message) {
@@ -107,7 +107,7 @@ const messageController = {
             // Send group message
             const result = await whatsappService.sendGroupMessage(groupId, message.trim());
 
-            logger.info(`✅ Group message sent successfully to ${groupId}`);
+            logger.debug(`✅ Group message sent successfully to ${groupId}`);
 
             const response = {
                 success: true,

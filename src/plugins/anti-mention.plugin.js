@@ -13,7 +13,7 @@ const antiGroupMention = async (sock, message) => {
 
         if (groupJids.includes(groupId)) {
             logger.warn(`⚠️Group lu di tag bang (${groupId}) sama si ${pushName}[${participant}]`)
-            logger.info('♻️ Otw kick ...')
+            logger.debug('♻️ Otw kick ...')
 
             let textContent = `Cung yang kena spam *mention group* sama si dongo satu ini ☝️@${participant.split('@')[0]}`;
             textContent += `\n\n> Sent via ${packageJson.name}\n> @${packageJson.author}/${packageJson.name}.git`;
@@ -30,7 +30,7 @@ const antiGroupMention = async (sock, message) => {
             // kick ae dah
             setTimeout( async () => {
                 await sock.groupParticipantsUpdate(groupId, [participant], 'remove')
-                logger.info(`✅ Done kick pakcik si ${pushName}[${participant} dari grup (${groupId})`);
+                logger.debug(`✅ Done kick pakcik si ${pushName}[${participant} dari grup (${groupId})`);
             }, 10_000);
         }
     }

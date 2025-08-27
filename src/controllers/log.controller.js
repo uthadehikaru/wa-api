@@ -5,7 +5,7 @@ const logController = {
         try {
             const { limit = 100, level = 'all' } = req.query;
 
-            logger.info(`📋 Get logs request received - Limit: ${limit}, Level: ${level}`);
+            logger.debug(`📋 Get logs request received - Limit: ${limit}, Level: ${level}`);
 
             // Validate limit
             const logLimit = Math.min(parseInt(limit) || 100, 1000); // Max 1000 logs
@@ -31,7 +31,7 @@ const logController = {
                 message: `Retrieved ${filteredLogs.length} log entries`
             };
 
-            logger.info(`📋 Logs response: ${filteredLogs.length} entries returned`);
+            logger.debug(`📋 Logs response: ${filteredLogs.length} entries returned`);
 
             res.status(200).json(response);
 

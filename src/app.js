@@ -24,7 +24,7 @@ app.use('/public', express.static(path.join(__dirname, '../public')));
 app.use(morgan('combined', {
     stream: {
         write: (message) => {
-            logger.info(message.trim());
+            logger.debug(message.trim());
         }
     }
 }));
@@ -61,8 +61,8 @@ whatsappService.initialize();
 
 // Start server
 app.listen(PORT, () => {
-    logger.info(`🚀 Server running on port ${PORT}`);
-    logger.info(`📱 WhatsApp API server started`);
+    logger.debug(`🚀 Server running on port ${PORT}`);
+    logger.debug(`📱 WhatsApp API server started`);
 });
 
 module.exports = app;

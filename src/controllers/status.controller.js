@@ -5,7 +5,7 @@ const packageJson = require('../../package.json');
 const statusController = {
     getStatus: async (req, res) => {
         try {
-            logger.info('📊 Status check request received');
+            logger.debug('📊 Status check request received');
 
             const status = whatsappService.getStatus();
 
@@ -36,7 +36,7 @@ const statusController = {
                 response.data.qrCode = status.qrCode;
             }
 
-            logger.info(`📊 Status response: ${status.connectionStatus}, Connected: ${status.isConnected}`);
+            logger.debug(`📊 Status response: ${status.connectionStatus}, Connected: ${status.isConnected}`);
 
             res.status(200).json(response);
 
