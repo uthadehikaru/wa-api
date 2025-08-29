@@ -1,19 +1,22 @@
 ### WhatsApp API Collection
 ### Base URL: http://localhost:3000/api/v1
+### IMPORTANT: Set your API token in the Authorization header for all requests except /ping
 
 ###
-# 1. Ping/Pong - Health Check
+# 1. Ping/Pong - Health Check (No authentication required)
 GET http://localhost:3000/api/v1/ping
 Content-Type: application/json
 
 ###
 # 2. Status Check
 GET http://localhost:3000/api/v1/status
+Authorization: Bearer your-api-token-here
 Content-Type: application/json
 
 ###
 # 3. Send Message to Personal Chat
 POST http://localhost:3000/api/v1/message
+Authorization: Bearer your-api-token-here
 Content-Type: application/json
 
 {
@@ -24,6 +27,7 @@ Content-Type: application/json
 ###
 # 4. Send Message to Group
 POST http://localhost:3000/api/v1/message/group
+Authorization: Bearer your-api-token-here
 Content-Type: application/json
 
 {
@@ -34,46 +38,55 @@ Content-Type: application/json
 ###
 # 5. Get All Logs
 GET http://localhost:3000/api/v1/logs
+Authorization: Bearer your-api-token-here
 Content-Type: application/json
 
 ###
 # 6. Get Logs with Limit
 GET http://localhost:3000/api/v1/logs?limit=50
+Authorization: Bearer your-api-token-here
 Content-Type: application/json
 
 ###
 # 7. Get Error Logs Only
 GET http://localhost:3000/api/v1/logs?level=error&limit=100
+Authorization: Bearer your-api-token-here
 Content-Type: application/json
 
 ###
 # 8. Get Info Logs Only
 GET http://localhost:3000/api/v1/logs?level=info&limit=100
+Authorization: Bearer your-api-token-here
 Content-Type: application/json
 
 ###
 # 9. QR Code Status
 GET http://localhost:3000/api/v1/qr/status
+Authorization: Bearer your-api-token-here
 Content-Type: application/json
 
 ###
 # 10. QR Code Image
 GET http://localhost:3000/api/v1/qr/image
+Authorization: Bearer your-api-token-here
 Content-Type: application/json
 
 ###
 # 11. Logout from WhatsApp
 POST http://localhost:3000/api/v1/qr/logout
+Authorization: Bearer your-api-token-here
 Content-Type: application/json
 
 ###
 # 12. Regenerate QR Code
 POST http://localhost:3000/api/v1/qr/regenerate
+Authorization: Bearer your-api-token-here
 Content-Type: application/json
 
 ###
 # 13. Clear Authentication
 POST http://localhost:3000/api/v1/qr/clear-auth
+Authorization: Bearer your-api-token-here
 Content-Type: application/json
 
 ###
@@ -82,6 +95,7 @@ Content-Type: application/json
 ###
 # Send Message - Missing phoneNumber
 POST http://localhost:3000/api/v1/message
+Authorization: Bearer your-api-token-here
 Content-Type: application/json
 
 {
@@ -91,6 +105,7 @@ Content-Type: application/json
 ###
 # Send Message - Empty message
 POST http://localhost:3000/api/v1/message
+Authorization: Bearer your-api-token-here
 Content-Type: application/json
 
 {
@@ -101,6 +116,7 @@ Content-Type: application/json
 ###
 # Send Group Message - Missing groupId
 POST http://localhost:3000/api/v1/message/group
+Authorization: Bearer your-api-token-here
 Content-Type: application/json
 
 {
@@ -110,4 +126,5 @@ Content-Type: application/json
 ###
 # Invalid Route
 GET http://localhost:3000/api/v1/invalid-route
+Authorization: Bearer your-api-token-here
 Content-Type: application/json

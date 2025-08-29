@@ -33,7 +33,12 @@ npm install
 
 3. Set up environment variables:
 ```bash
-cp .env.example .env
+cp env.example .env
+```
+
+Edit the `.env` file and set your API token:
+```bash
+API_TOKEN=your-secure-api-token-here
 ```
 
 4. Start the server:
@@ -45,10 +50,37 @@ npm run dev
 npm start
 ```
 
+## Authentication
+
+All API endpoints (except `/api/v1/ping`) require authentication using an API token. You must include the token in your request headers.
+
+### Authentication Methods
+
+1. **Authorization Header (Recommended):**
+   ```
+   Authorization: Bearer your-api-token-here
+   ```
+
+2. **X-API-Token Header (Alternative):**
+   ```
+   X-API-Token: your-api-token-here
+   ```
+
+### Setting Up Authentication
+
+1. Create a `.env` file in the root directory
+2. Add your API token:
+   ```
+   API_TOKEN=your-secure-api-token-here
+   ```
+3. Restart the server after setting the token
+
 ## API Endpoints
 
 ### 1. Health Check
 **GET** `/api/v1/ping`
+
+*No authentication required*
 
 Check if the service is running properly.
 
@@ -68,6 +100,11 @@ Check if the service is running properly.
 **GET** `/api/v1/status`
 
 Check WhatsApp connection status (connected/disconnected).
+
+**Headers:**
+```
+Authorization: Bearer your-api-token-here
+```
 
 **Response:**
 ```json
@@ -98,6 +135,12 @@ Check WhatsApp connection status (connected/disconnected).
 
 Send text message to a WhatsApp number.
 
+**Headers:**
+```
+Authorization: Bearer your-api-token-here
+Content-Type: application/json
+```
+
 **Request Body:**
 ```json
 {
@@ -125,6 +168,12 @@ Send text message to a WhatsApp number.
 
 Send message to a WhatsApp group.
 
+**Headers:**
+```
+Authorization: Bearer your-api-token-here
+Content-Type: application/json
+```
+
 **Request Body:**
 ```json
 {
@@ -151,6 +200,11 @@ Send message to a WhatsApp group.
 **GET** `/api/v1/qr/status`
 
 Check QR code availability and connection status.
+
+**Headers:**
+```
+Authorization: Bearer your-api-token-here
+```
 
 **Response:**
 ```json

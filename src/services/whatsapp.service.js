@@ -11,9 +11,6 @@ const path = require('path');
 const fs = require('fs');
 const packageJson = require('../../package.json');
 
-// import plugins syncronously
-const { antiGroupMention } = require('../plugins/anti-mention.plugin')
-
 class WhatsAppService {
     constructor() {
         this.sock = null;
@@ -110,17 +107,6 @@ class WhatsAppService {
         });
 
         this.sock.ev.on('creds.update', saveCreds);
-
-        this.sock.ev.on('messages.upsert', (m) => {
-            const messages = m.messages;
-            if (messages && messages.length > 0) {
-                let message = messages[0];
-                antiGroupMention(this.sock, message);
-                console.info('Received messages: ', JSON.stringify(message, 2, null))
-
-                logger.debug('📨 Received messages:', messages.length);
-            }
-        });
     }
 
     async sendMessage(phoneNumber, message) {

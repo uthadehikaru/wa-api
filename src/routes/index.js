@@ -1,5 +1,6 @@
 const express = require('express');
 const multer = require('multer');
+const { authenticateToken } = require('../middleware/auth.middleware');
 const pingController = require('../controllers/ping.controller');
 const statusController = require('../controllers/status.controller');
 const messageController = require('../controllers/message.controller');
@@ -43,32 +44,32 @@ const upload = multer({
     }
 });
 
-// Health check / Ping endpoint
+// Health check / Ping endpoint (no auth required)
 router.get('/ping', pingController.ping);
 
 // Status check endpoint
-router.get('/status', statusController.getStatus);
+router.get('/status', authenticateToken, statusController.getStatus);
 
 // Message endpoints
-router.post('/message', messageController.sendPersonalMessage);
-router.post('/message/group', messageController.sendGroupMessage);
+router.post('/message', authenticateToken, messageController.sendPersonalMessage);
+router.post('/message/group', authenticateToken, messageController.sendGroupMessage);
 
 // Document endpoints
-router.post('/document', messageController.sendDocumentMessage); // JSON with base64
-router.post('/document/upload', upload.single('file'), messageController.sendDocumentMessageFormData); // Form data with file upload
+router.post('/document', authenticateToken, messageController.sendDocumentMessage); // JSON with base64
+router.post('/document/upload', authenticateToken, upload.single('file'), messageController.sendDocumentMessageFormData); // Form data with file upload
 
 // Utility endpoints
-router.post('/analyze-base64', messageController.analyzeBase64File); // Analyze base64 file info
-router.post('/convert-to-base64', upload.single('file'), messageController.convertFileToBase64);
+router.post('/analyze-base64', authenticateToken, messageController.analyzeBase64File); // Analyze base64 file info
+router.post('/convert-to-base64', authenticateToken, upload.single('file'), messageController.convertFileToBase64);
 
 // Logs endpoint
-router.get('/logs', logController.getLogs);
+router.get('/logs', authenticateToken, logController.getLogs);
 
 // QR Code endpoints
-router.get('/qr/status', qrController.getQRStatus);
-router.get('/qr/image', qrController.getQRImage);
-router.post('/qr/logout', qrController.logout);
-router.post('/qr/regenerate', qrController.regenerateQR);
-router.post('/qr/clear-auth', qrController.clearAuth);
+router.get('/qr/status', authenticateToken, qrController.getQRStatus);
+router.get('/qr/image', authenticateToken, qrController.getQRImage);
+router.post('/qr/logout', authenticateToken, qrController.logout);
+router.post('/qr/regenerate', authenticateToken, qrController.regenerateQR);
+router.post('/qr/clear-auth', authenticateToken, qrController.clearAuth);
 
 module.exports = router;
