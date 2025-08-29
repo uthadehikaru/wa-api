@@ -39,6 +39,11 @@ app.get('/qr', (req, res) => {
     res.sendFile(path.join(__dirname, '../public/qr/index.html'));
 });
 
+// Base64 test page
+app.get('/test-base64', (req, res) => {
+    res.sendFile(path.join(__dirname, '../public/test-base64.html'));
+});
+
 // Error handling middleware
 app.use((err, req, res, next) => {
     logger.error('Unhandled error:', err);

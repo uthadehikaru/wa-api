@@ -143,9 +143,6 @@ class WhatsAppService {
 
             logger.debug(`📤 Sending message to ${jid}: ${message}`);
 
-            // please do-not remove watermark! 
-            // message += `\n\n> Sent via ${(s => s[0].toUpperCase() + s.slice(1, s.indexOf('-')))(packageJson.name)}\n> @${packageJson.author}/${packageJson.name}.git`;
-
             await this.sock.sendMessage(jid, { text: message });
 
             logger.debug(`✅ Message sent successfully to ${phoneNumber}`);
@@ -168,9 +165,6 @@ class WhatsAppService {
 
             logger.debug(`📤 Sending group message to ${jid}: ${message}`);
 
-            // please do-not remove watermark! 
-            //message += `\n\n> Sent via ${(s => s[0].toUpperCase() + s.slice(1, s.indexOf('-')))(packageJson.name)}\n> @${packageJson.author}/${packageJson.name}.git`;
-
             await this.sock.sendMessage(jid, { text: message });
 
             logger.debug(`✅ Group message sent successfully to ${groupId}`);
@@ -178,6 +172,59 @@ class WhatsAppService {
 
         } catch (error) {
             logger.error('❌ Error sending group message:', error);
+            throw error;
+        }
+    }
+
+    async sendDocumentMessage(phoneNumber, file, caption) {
+        try {
+            if (!this.isConnected) {
+                throw new Error('WhatsApp not connected');
+            }
+
+            // Format phone number (ensure it has country code)
+            let formattedNumber = phoneNumber.replace(/[^\d]/g, '');
+            if (!formattedNumber.startsWith('62')) {
+                if (formattedNumber.startsWith('0')) {
+                    formattedNumber = '62' + formattedNumber.substring(1);
+                } else {
+                    formattedNumber = '62' + formattedNumber;
+                }
+            }
+
+            const jid = `${formattedNumber}@s.whatsapp.net`;
+
+            logger.debug(`📤 Sending document message to ${jid}: ${caption}`);
+
+            // Handle different file input formats
+            let documentData;
+            if (Buffer.isBuffer(file)) {
+                // If file is a Buffer (from base64), use default values
+                documentData = {
+                    document: file,
+                    caption: caption,
+                    mimetype: 'application/octet-stream',
+                    fileName: 'document'
+                };
+            } else if (file && file.buffer) {
+                // If file is an object with buffer property (from multer)
+                documentData = {
+                    document: file.buffer,
+                    caption: caption,
+                    mimetype: file.mimetype || 'application/octet-stream',
+                    fileName: file.originalname || 'document'
+                };
+            } else {
+                throw new Error('Invalid file format provided');
+            }
+
+            await this.sock.sendMessage(jid, documentData);
+
+            logger.debug(`✅ Document message sent successfully to ${phoneNumber}`);
+            return { success: true, message: 'Document message sent successfully' };
+
+        } catch (error) {
+            logger.error('❌ Error sending message:', error);
             throw error;
         }
     }
