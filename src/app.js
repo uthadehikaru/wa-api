@@ -1,3 +1,6 @@
+// Load environment variables first
+require('dotenv').config();
+
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
@@ -6,7 +9,6 @@ const path = require('path');
 const logger = require('./utils/logger');
 const whatsappService = require('./services/whatsapp.service');
 const routes = require('./routes');
-require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;

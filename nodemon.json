@@ -1,0 +1,19 @@
+{
+  "watch": [
+    "src/",
+    ".env"
+  ],
+  "ext": "js,json",
+  "ignore": [
+    "node_modules/",
+    "logs/",
+    "auth/",
+    "uploads/",
+    "public/qr/*.png"
+  ],
+  "env": {
+    "NODE_ENV": "development"
+  },
+  "delay": "1000",
+  "verbose": true
+}
