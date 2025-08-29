@@ -68,6 +68,7 @@ router.get('/logs', authenticateToken, logController.getLogs);
 // QR Code endpoints
 router.get('/qr/status', authenticateToken, qrController.getQRStatus);
 router.get('/qr/image', authenticateToken, qrController.getQRImage);
+router.get('/qr/image/base64', authenticateToken, qrController.getQRImageBase64);
 router.post('/qr/logout', authenticateToken, qrController.logout);
 router.post('/qr/regenerate', authenticateToken, qrController.regenerateQR);
 router.post('/qr/clear-auth', authenticateToken, qrController.clearAuth);

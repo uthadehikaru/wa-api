@@ -72,6 +72,18 @@ Authorization: Bearer your-api-token-here
 Content-Type: application/json
 
 ###
+# 10a. QR Code Image as Base64 (Method 1: Query Parameter)
+GET http://localhost:3000/api/v1/qr/image?format=base64
+Authorization: Bearer your-api-token-here
+Content-Type: application/json
+
+###
+# 10b. QR Code Image as Base64 (Method 2: Dedicated Endpoint)
+GET http://localhost:3000/api/v1/qr/image/base64
+Authorization: Bearer your-api-token-here
+Content-Type: application/json
+
+###
 # 11. Logout from WhatsApp
 POST http://localhost:3000/api/v1/qr/logout
 Authorization: Bearer your-api-token-here

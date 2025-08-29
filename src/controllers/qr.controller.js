@@ -28,6 +28,11 @@ const qrController = {
 
             const qrImagePath = whatsappService.getQRCodeImagePath();
             
+            // Check if base64 format is requested
+            if (req.query.format === 'base64') {
+                return qrController.getQRImageBase64(req, res);
+            }
+            
             // Set appropriate headers for image
             res.setHeader('Content-Type', 'image/png');
             res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
@@ -46,6 +51,63 @@ const qrController = {
             res.status(500).json({
                 success: false,
                 error: 'Failed to serve QR code image',
+                message: error.message,
+                timestamp: new Date().toISOString()
+            });
+        }
+    },
+
+    getQRImageBase64: async (req, res) => {
+        try {
+            logger.debug('📱 QR Code base64 image request received');
+
+            const status = whatsappService.getStatus();
+            
+            if (status.connectionStatus !== 'qr_ready') {
+                return res.status(404).json({
+                    success: false,
+                    error: 'QR Code not available',
+                    message: 'WhatsApp is not in QR code generation state'
+                });
+            }
+
+            if (!whatsappService.hasQRCodeImage()) {
+                return res.status(404).json({
+                    success: false,
+                    error: 'QR Code image not found',
+                    message: 'QR Code image file does not exist'
+                });
+            }
+
+            const qrImagePath = whatsappService.getQRCodeImagePath();
+            
+            // Read the image file and convert to base64
+            const imageBuffer = fs.readFileSync(qrImagePath);
+            const base64Image = imageBuffer.toString('base64');
+            
+            // Create data URL
+            const dataUrl = `data:image/png;base64,${base64Image}`;
+            
+            const response = {
+                success: true,
+                data: {
+                    qrCodeBase64: base64Image,
+                    qrCodeDataUrl: dataUrl,
+                    imageType: 'image/png',
+                    timestamp: new Date().toISOString()
+                }
+            };
+
+            logger.debug('📱 QR Code base64 image served successfully');
+
+            res.status(200).json(response);
+
+        } catch (error) {
+            logger.error('❌ Error serving QR code base64 image:', error);
+
+            res.status(500).json({
+                success: false,
+                error: 'Failed to serve QR code base64 image',
                 message: error.message,
                 timestamp: new Date().toISOString()
             });
