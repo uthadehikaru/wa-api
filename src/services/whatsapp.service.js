@@ -43,6 +43,11 @@ class WhatsAppService {
 
             this.sock = makeWASocket({
                 version,
+                browser: [
+                    process.env.DEVICE_NAME || 'Desktop',
+                    'Whisper API',
+                    '1.0.0'
+                ],
                 auth: state,
                 printQRInTerminal: false,
                 logger: logger
