@@ -58,6 +58,10 @@ router.post('/message/group', authenticateToken, messageController.sendGroupMess
 router.post('/document', authenticateToken, messageController.sendDocumentMessage); // JSON with base64
 router.post('/document/upload', authenticateToken, upload.single('file'), messageController.sendDocumentMessageFormData); // Form data with file upload
 
+// Image endpoints
+router.post('/image', authenticateToken, messageController.sendImageMessage); // JSON with base64
+router.post('/image/upload', authenticateToken, upload.single('file'), messageController.sendImageMessageFormData); // Form data with file upload
+
 // Utility endpoints
 router.post('/analyze-base64', authenticateToken, messageController.analyzeBase64File); // Analyze base64 file info
 router.post('/convert-to-base64', authenticateToken, upload.single('file'), messageController.convertFileToBase64);

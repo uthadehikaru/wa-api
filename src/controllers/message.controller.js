@@ -460,6 +460,169 @@ const messageController = {
 
             res.status(500).json(response);
         }
+    },
+
+    sendImageMessage: async (req, res) => {
+        try {
+            const { phoneNumber, file, caption, filename, mimetype } = req.body;
+
+            logger.debug(`📨 Send image message request received for ${phoneNumber}`);
+
+            // Validation
+            if (!phoneNumber || !file) {
+                logger.warn('❌ Missing required fields: phoneNumber or file');
+                return res.status(400).json({
+                    success: false,
+                    error: 'Missing required fields',
+                    message: 'phoneNumber and file are required'
+                });
+            }
+
+            // Check if WhatsApp is connected
+            if (!whatsappService.isConnected) {
+                logger.warn('❌ WhatsApp not connected');
+                return res.status(503).json({
+                    success: false,
+                    error: 'Service unavailable',
+                    message: 'WhatsApp is not connected. Please check connection status.'
+                });
+            }
+
+            // Extract file info from base64
+            const fileInfo = extractFileInfoFromBase64(file);
+            
+            // Use provided filename/mimetype if available, otherwise use extracted ones
+            const finalFilename = filename || fileInfo.filename;
+            const finalMimetype = mimetype || fileInfo.mimetype;
+
+            // Validate that it's an image mimetype
+            if (!finalMimetype.startsWith('image/')) {
+                logger.warn(`❌ Invalid file type: ${finalMimetype}`);
+                return res.status(400).json({
+                    success: false,
+                    error: 'Invalid file type',
+                    message: 'File must be an image (image/jpeg, image/png, etc.)'
+                });
+            }
+
+            logger.debug(`🖼️ Image info: ${finalFilename} (${finalMimetype})`);
+
+            // Send image message with file info
+            const result = await whatsappService.sendImageMessage(phoneNumber, {
+                buffer: fileInfo.buffer,
+                mimetype: finalMimetype,
+                originalname: finalFilename
+            }, caption);
+
+            logger.debug(`✅ Image message sent successfully to ${phoneNumber}`);
+
+            const response = {
+                success: true,
+                data: {
+                    phoneNumber,
+                    filename: finalFilename,
+                    mimetype: finalMimetype,
+                    fileSize: fileInfo.buffer.length,
+                    caption,
+                    status: 'sent',
+                    timestamp: new Date().toISOString()
+                },
+                message: result.message
+            };
+
+            res.status(200).json(response);
+
+        } catch (error) {
+            logger.error('❌ Error in send image message controller:', error);
+
+            const response = {
+                success: false,
+                error: 'Failed to send image message',
+                message: error.message,
+                timestamp: new Date().toISOString()
+            };
+
+            res.status(500).json(response);
+        }
+    },
+
+    sendImageMessageFormData: async (req, res) => {
+        try {
+            const { phoneNumber, caption } = req.body;
+            const uploadedFile = req.file;
+
+            logger.debug(`📨 Send image message (form data) request received for ${phoneNumber}`);
+
+            // Validation
+            if (!phoneNumber || !uploadedFile) {
+                logger.warn('❌ Missing required fields: phoneNumber or file');
+                return res.status(400).json({
+                    success: false,
+                    error: 'Missing required fields',
+                    message: 'phoneNumber and file are required'
+                });
+            }
+
+            // Validate that it's an image mimetype
+            if (!uploadedFile.mimetype.startsWith('image/')) {
+                logger.warn(`❌ Invalid file type: ${uploadedFile.mimetype}`);
+                return res.status(400).json({
+                    success: false,
+                    error: 'Invalid file type',
+                    message: 'File must be an image (image/jpeg, image/png, etc.)'
+                });
+            }
+
+            // Check if WhatsApp is connected
+            if (!whatsappService.isConnected) {
+                logger.warn('❌ WhatsApp not connected');
+                return res.status(503).json({
+                    success: false,
+                    error: 'Service unavailable',
+                    message: 'WhatsApp is not connected. Please check connection status.'
+                });
+            }
+
+            // Create a file object that matches what the WhatsApp service expects
+            const fileObject = {
+                buffer: uploadedFile.buffer,
+                mimetype: uploadedFile.mimetype,
+                originalname: uploadedFile.originalname
+            };
+            
+            // Send image message using the properly formatted file object
+            const result = await whatsappService.sendImageMessage(phoneNumber, fileObject, caption);
+
+            logger.debug(`✅ Image message (form data) sent successfully to ${phoneNumber}`);
+
+            const response = {
+                success: true,
+                data: {
+                    phoneNumber,
+                    fileName: uploadedFile.originalname,
+                    fileSize: uploadedFile.size,
+                    mimeType: uploadedFile.mimetype,
+                    caption,
+                    status: 'sent',
+                    timestamp: new Date().toISOString()
+                },
+                message: result.message
+            };
+
+            res.status(200).json(response);
+
+        } catch (error) {
+            logger.error('❌ Error in send image message (form data) controller:', error);
+
+            const response = {
+                success: false,
+                error: 'Failed to send image message',
+                message: error.message,
+                timestamp: new Date().toISOString()
+            };
+
+            res.status(500).json(response);
+        }
     }
 };
 

@@ -215,6 +215,57 @@ class WhatsAppService {
         }
     }
 
+    async sendImageMessage(phoneNumber, file, caption) {
+        try {
+            if (!this.isConnected) {
+                throw new Error('WhatsApp not connected');
+            }
+
+            // Format phone number (ensure it has country code)
+            let formattedNumber = phoneNumber.replace(/[^\d]/g, '');
+            if (!formattedNumber.startsWith('62')) {
+                if (formattedNumber.startsWith('0')) {
+                    formattedNumber = '62' + formattedNumber.substring(1);
+                } else {
+                    formattedNumber = '62' + formattedNumber;
+                }
+            }
+
+            const jid = `${formattedNumber}@s.whatsapp.net`;
+
+            logger.debug(`📤 Sending image message to ${jid}: ${caption || 'no caption'}`);
+
+            // Handle different file input formats
+            let imageData;
+            if (Buffer.isBuffer(file)) {
+                // If file is a Buffer (from base64), use default values
+                imageData = {
+                    image: file,
+                    caption: caption,
+                    mimetype: 'image/jpeg'
+                };
+            } else if (file && file.buffer) {
+                // If file is an object with buffer property (from multer)
+                imageData = {
+                    image: file.buffer,
+                    caption: caption,
+                    mimetype: file.mimetype || 'image/jpeg'
+                };
+            } else {
+                throw new Error('Invalid file format provided');
+            }
+
+            await this.sock.sendMessage(jid, imageData);
+
+            logger.debug(`✅ Image message sent successfully to ${phoneNumber}`);
+            return { success: true, message: 'Image message sent successfully' };
+
+        } catch (error) {
+            logger.error('❌ Error sending image message:', error);
+            throw error;
+        }
+    }
+
     getStatus() {
         return {
             isConnected: this.isConnected,
