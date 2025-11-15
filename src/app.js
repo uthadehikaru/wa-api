@@ -78,8 +78,8 @@ whatsappService.initialize();
 
 // Start server
 app.listen(PORT, () => {
-    logger.debug(`🚀 Server running on port ${PORT}`);
-    logger.debug(`📱 WhatsApp API server started`);
+    logger.info(`🚀 Server running on port ${PORT}`);
+    logger.info(`📱 WhatsApp API server started`);
 });
 
 module.exports = app;

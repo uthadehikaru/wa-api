@@ -24,7 +24,7 @@ class WhatsAppService {
 
     async initialize() {
         try {
-            logger.debug('🔄 Initializing WhatsApp service...');
+            logger.info('🔄 Initializing WhatsApp service...');
 
             // Create auth directory if it doesn't exist
             if (!fs.existsSync(this.authDir)) {
@@ -39,7 +39,7 @@ class WhatsAppService {
             const { state, saveCreds } = await useMultiFileAuthState(this.authDir);
             const { version, isLatest } = await fetchLatestBaileysVersion();
 
-            logger.debug(`📱 Using WA version ${version.join('.')}, isLatest: ${isLatest}`);
+            logger.info(`📱 Using WA version ${version.join('.')}, isLatest: ${isLatest}`);
 
             this.sock = makeWASocket({
                 version,
@@ -67,7 +67,7 @@ class WhatsAppService {
 
             if (qr) {
                 this.qrCode = qr;
-                logger.debug('📱 QR Code generated. Scan to connect.');
+                logger.info('📱 QR Code generated. Scan to connect.');
                 qrcode.generate(qr, { small: true });
                 this.connectionStatus = 'qr_ready';
                 
@@ -81,7 +81,7 @@ class WhatsAppService {
                         width: 300,
                         margin: 2
                     });
-                    logger.debug('📱 QR Code image saved successfully');
+                    logger.info('📱 QR Code image saved successfully');
                 } catch (error) {
                     logger.error('❌ Error saving QR code image:', error);
                 }
@@ -91,22 +91,22 @@ class WhatsAppService {
                 const shouldReconnect = lastDisconnect?.error?.output?.statusCode !== DisconnectReason.loggedOut;
 
                 if (shouldReconnect) {
-                    logger.debug('🔄 Connection closed, reconnecting...');
+                    logger.info('🔄 Connection closed, reconnecting...');
                     this.connectionStatus = 'reconnecting';
                     this.isConnected = false;
                     this.initialize();
                 } else {
-                    logger.debug('🔓 Connection closed, logged out');
+                    logger.info('🔓 Connection closed, logged out');
                     this.connectionStatus = 'logged_out';
                     this.isConnected = false;
                 }
             } else if (connection === 'open') {
-                logger.debug('✅ WhatsApp connection established');
+                logger.info('✅ WhatsApp connection established');
                 this.connectionStatus = 'connected';
                 this.isConnected = true;
                 this.qrCode = null;
             } else if (connection === 'connecting') {
-                logger.debug('🔄 Connecting to WhatsApp...');
+                logger.info('🔄 Connecting to WhatsApp...');
                 this.connectionStatus = 'connecting';
             }
         });
@@ -132,11 +132,11 @@ class WhatsAppService {
 
             const jid = `${formattedNumber}@s.whatsapp.net`;
 
-            logger.debug(`📤 Sending message to ${jid}: ${message}`);
+            logger.info(`📤 Sending message to ${jid}: ${message}`);
 
             await this.sock.sendMessage(jid, { text: message });
 
-            logger.debug(`✅ Message sent successfully to ${phoneNumber}`);
+            logger.info(`✅ Message sent successfully to ${phoneNumber}`);
             return { success: true, message: 'Message sent successfully' };
 
         } catch (error) {
@@ -154,11 +154,11 @@ class WhatsAppService {
             // Group ID should end with @g.us
             const jid = groupId.includes('@g.us') ? groupId : `${groupId}@g.us`;
 
-            logger.debug(`📤 Sending group message to ${jid}: ${message}`);
+            logger.info(`📤 Sending group message to ${jid}: ${message}`);
 
             await this.sock.sendMessage(jid, { text: message });
 
-            logger.debug(`✅ Group message sent successfully to ${groupId}`);
+            logger.info(`✅ Group message sent successfully to ${groupId}`);
             return { success: true, message: 'Group message sent successfully' };
 
         } catch (error) {
@@ -185,7 +185,7 @@ class WhatsAppService {
 
             const jid = `${formattedNumber}@s.whatsapp.net`;
 
-            logger.debug(`📤 Sending document message to ${jid}: ${caption}`);
+            logger.info(`📤 Sending document message to ${jid}: ${caption}`);
 
             // Handle different file input formats
             let documentData;
@@ -211,7 +211,7 @@ class WhatsAppService {
 
             await this.sock.sendMessage(jid, documentData);
 
-            logger.debug(`✅ Document message sent successfully to ${phoneNumber}`);
+            logger.info(`✅ Document message sent successfully to ${phoneNumber}`);
             return { success: true, message: 'Document message sent successfully' };
 
         } catch (error) {
@@ -238,7 +238,7 @@ class WhatsAppService {
 
             const jid = `${formattedNumber}@s.whatsapp.net`;
 
-            logger.debug(`📤 Sending image message to ${jid}: ${caption || 'no caption'}`);
+            logger.info(`📤 Sending image message to ${jid}: ${caption || 'no caption'}`);
 
             // Handle different file input formats
             let imageData;
@@ -262,7 +262,7 @@ class WhatsAppService {
 
             await this.sock.sendMessage(jid, imageData);
 
-            logger.debug(`✅ Image message sent successfully to ${phoneNumber}`);
+            logger.info(`✅ Image message sent successfully to ${phoneNumber}`);
             return { success: true, message: 'Image message sent successfully' };
 
         } catch (error) {
@@ -292,7 +292,7 @@ class WhatsAppService {
     async logout() {
         try {
             if (this.sock && this.isConnected) {
-                logger.debug('🔓 Logging out from WhatsApp...');
+                logger.info('🔓 Logging out from WhatsApp...');
                 await this.sock.logout();
                 this.connectionStatus = 'logged_out';
                 this.isConnected = false;
@@ -301,10 +301,10 @@ class WhatsAppService {
                 // Remove QR code image if exists
                 if (this.hasQRCodeImage()) {
                     fs.unlinkSync(this.qrCodePath);
-                    logger.debug('🗑️ QR code image removed');
+                    logger.info('🗑️ QR code image removed');
                 }
                 
-                logger.debug('✅ Logout successful');
+                logger.info('✅ Logout successful');
                 return { success: true, message: 'Logout successful' };
             } else {
                 logger.warn('⚠️ No active connection to logout from');
@@ -338,7 +338,7 @@ class WhatsAppService {
             // Reinitialize the service
             await this.initialize();
             
-            logger.debug('✅ QR code regeneration initiated');
+            logger.info('✅ QR code regeneration initiated');
             return { success: true, message: 'QR code regeneration initiated' };
             
         } catch (error) {
@@ -349,7 +349,7 @@ class WhatsAppService {
 
     async clearAuth() {
         try {
-            logger.debug('🗑️ Clearing authentication data...');
+            logger.info('🗑️ Clearing authentication data...');
             
             // Logout first if connected
             if (this.isConnected) {
@@ -365,13 +365,13 @@ class WhatsAppService {
                         fs.unlinkSync(filePath);
                     }
                 }
-                logger.debug('🗑️ Authentication files cleared');
+                logger.info('🗑️ Authentication files cleared');
             }
             
             // Remove QR code image
             if (this.hasQRCodeImage()) {
                 fs.unlinkSync(this.qrCodePath);
-                logger.debug('🗑️ QR code image removed');
+                logger.info('🗑️ QR code image removed');
             }
             
             // Reset state
@@ -382,7 +382,7 @@ class WhatsAppService {
             // Reinitialize
             await this.initialize();
             
-            logger.debug('✅ Authentication cleared and service reinitialized');
+            logger.info('✅ Authentication cleared and service reinitialized');
             return { success: true, message: 'Authentication cleared successfully' };
             
         } catch (error) {
